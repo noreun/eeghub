@@ -14,6 +14,7 @@ eeghub is designed to concentrate all parameters for the preprocessing of one pr
 
 The interace for each step is very simple : 
 
+```
 function fname = eeghub_mytool_mypreproc(param)
   
   D = load(param.fname);
@@ -30,6 +31,7 @@ function fname = eeghub_mytool_mypreproc(param)
   fname = fullfile(param.datapath, D.fname);
 
 end
+```
 
 Where :
 
@@ -39,17 +41,18 @@ Where :
 Afterwards, you should create a cell with the steps that should be applied in the correct sequence to your data,
 and pass it to the eeghub_main function. Here is a simple example :
 
----------------------------------------
-
-actions = {...
-  @eeghub_spm_prepare,               1;...
-  @eeghub_fieldtrip_highpassfilter,  1;...
-  @eeghub_spm_epoching,              1;...
-  @eeghub_spm_lowpassfilter,         1;...
-  @eeghub_spm_crop,                  1;...
-  @eeghub_spm_baseline,              1;...
-};
-
+```
+ ---------------------------------------
+ 
+ actions = {...
+   @eeghub_spm_prepare,               1;...
+   @eeghub_fieldtrip_highpassfilter,  1;...
+   @eeghub_spm_epoching,              1;...
+   @eeghub_spm_lowpassfilter,         1;...
+   @eeghub_spm_crop,                  1;...
+   @eeghub_spm_baseline,              1;...
+ };
+ 
 param = struct;
 
 % prepare parameters
@@ -77,6 +80,7 @@ param.crop.posttrig = 700;
 eeghub_main(param, actions);
 
 -----------------------------
+```
 
 This would import, high pass filter, epoch, low pass filter and crop the epochs into smaller epochs, to avoid
 border effects from filtering.
@@ -105,13 +109,19 @@ this user lots of disk, but ensures that it is easy to redo a given step.
 If you did this before, you noticed that probably I sould have informed the events to epoch right? 
 For this you could created a function that returns a matrix with epoch onset and label for each trial
 
+```
+
 function event = decode_event(fname,datapath)
     % ...
 end
 
+...
+
 param.epoch.decode_event = @decode_event;
 
 eeghub_main(param, actions);
+
+```
 
 And so on.. you can specify hundreds of parameters to at least 15 diferent possible pre-processing stages
 
@@ -136,7 +146,9 @@ Known problems and tips :
 - When you redo something, the output WILL BE OVERWRITEN! so make a copy of the folder. Create new folders for each possible run was constantly filling the disk, so it was disabled.
 - The file with the state of the state machine is : groupfiles.mat. If you want to create a new preprocessing, just create a new folder and copy this file into it, the files outputed by the PREVIOUS step you want to run (e.g. to redo the high pass filter here, copy the output files from the epoching) and pass the name of the new folder
 
+```
 param.autonamedatafolder=0;
 param.datafolderprefix = 'my_newly_created_folder_for_new_high_pass_filter_parameter';
+```
 
 - Finally, this is the first pre alpha version of this software, be nice :)
