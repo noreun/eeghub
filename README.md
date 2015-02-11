@@ -4,6 +4,8 @@ This is a matlab tool born from pratical needs during the pre-processing of eeg 
 
 It is a state machine to control the steps in the preprocessing of eeg, using popular tools such as fieldtrip, spm, eeglab, etc
 
+Importantly, it will use multi-thread (matlab parfor) to process all your subjects in parallel.
+
 Usually when you preprocess eeg data you need to import it from the raw data exported from the eeg aquisition machine, then set the correct electrode positions, filter, downsample, re-reference, epoch, artefact correct/reject, do the time-frequency decomposition, etc.
 
 Since sometimes you just want to re-do one of these steps, and it's useful to have a state machine that knows which steps are already done, and re-do only the necessary work to avoid time consuming calculations. At the same time, if you redo an early pre-processing step, it's useful to automaticaly redo the steps after that. For instance if you change the filter parameters you probabily need to redo the artefact rejection/correction, and perhaps the epoching.
