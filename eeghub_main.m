@@ -79,6 +79,8 @@ function eeghub_main(param, actions, varargin)
     end
 
     % set default parameter values inside param structure
+    if ~isfield(param, 'locfile'), param.locfile = 'locfile'; end
+
     if ~isfield(param, 'lrp'), param.lrp = 0; end
     if ~isfield(param, 'parallel'), param.parallel = false; end
     
@@ -168,12 +170,7 @@ function eeghub_main(param, actions, varargin)
         end
        
         % list input files 
-        if ~isempty(param.data.evt_extension)
-
-            % list all EVENT files
-            allSubs=dir([param.rawfiles_datapath filesep '*' param.data.evt_extension]);
-
-        elseif isfield(param, 'list_subjects')
+        if isfield(param, 'list_subjects')
 
             % retrieve prepared list
             listSub=param.list_subjects;
@@ -181,6 +178,12 @@ function eeghub_main(param, actions, varargin)
             for nS=1:length(listSub)
                 allSubs(nS).name=listSub{nS};
             end
+            
+        elseif ~isempty(param.data.evt_extension)
+
+            % list all EVENT files
+            allSubs=dir([param.rawfiles_datapath filesep '*' param.data.evt_extension]);
+
         else
             error('Impossible to list subjects');
         end

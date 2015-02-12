@@ -8,11 +8,11 @@
 %
 
 %% Initial configuration : Please set the correct paths!
-clear all
+% clear all
 param = struct;
 
-% change path to script path
-cd(fileparts(mfilename('fullpath')))
+% % change path to script path
+% cd(fileparts(mfilename('fullpath')))
 
 % add eeghub to path
 addpath_recurse(fullfile(pwd,'../'), '.git');
@@ -30,7 +30,7 @@ param.data.raw_extension = '.raw';
 %% Define WHAT we are going to do, and in which order
 
 actions = {...
-    @eeghub_spm_prepare,               1;...
+    @eeghub_spm_prepare,               2;...
     @eeghub_fieldtrip_highpassfilter,  1;
     @eeghub_spm_epoching,              1;...
     @eeghub_spm_lowpassfilter,         1;...
@@ -45,38 +45,34 @@ actions = {...
 %: eeghub_spm_prepare : parameters for import
 param.badchan = [ ];   % in case some sensor is known to be bad
 
-% keep the sensors file in the param because interpolation after
-% artefact rejection will need it
-param.fname_sensfile = 'egi64_GSN_HydroCel_v1_0';
-param.fname_sensfileext = '.sfp';
-
-% occasionaly, we can remove unused channels such as HEOG, etc (if they
-% are not specified next)
-param.removenoneeg = 0;
-
 % create a simple array of sensors and fiducials and save in a .mat
 % since spm_eeg_prep needs this format
 % sensors and fiducials variables 
 param.fname_sensfile = 'egi256_GSN_HydroCel';
-% param.fname_sensfile = 'egi256_GSN_HydroCel_128subset';
 param.fname_sensfileext = '.sfp';
-param.sensfile = fullfile(pwd,[param.fname_sensfile '_sensors.mat']);
-param.fidfile = fullfile(pwd,[param.fname_sensfile '_fiducials.mat']);
-if ~exist(param.sensfile,'file') || ~exist(param.fidfile,'file')
-
-    fid = fopen(fullfile(pwd,[param.fname_sensfile param.fname_sensfileext]),'r');
-    sensC = textscan(fid,'%s %f %f %f',[4 inf]);
-    fclose(fid);
-
-    nchannels = size(sensC{1},1);
-    sens = [sensC{2} sensC{3} sensC{4}];
-    fid = sens([17 44 114],:);  
-    
-    % Save sensor positions and fiducials
-    save(param.sensfile, 'sens');
-    save(param.fidfile, 'fid');
-end
-
+param.locfile = 'locfile';
+% param.locfile = 'mat';
+% % occasionaly, we can remove unused channels such as HEOG, etc (if they
+% % are not specified next)
+% param.removenoneeg = 0;
+% param.fidlabel = 'nas lpa rpa';
+% param.sensfile = fullfile(pwd,[param.fname_sensfile '_sensors.mat']);
+% param.fidfile = fullfile(pwd,[param.fname_sensfile '_fiducials.mat']);
+% if ~exist(param.sensfile,'file') || ~exist(param.fidfile,'file')
+% 
+%     fid = fopen(fullfile(pwd,[param.fname_sensfile param.fname_sensfileext]),'r');
+%     sensC = textscan(fid,'%s %f %f %f',[4 inf]);
+%     fclose(fid);
+% 
+%     nchannels = size(sensC{1},1);
+%     sens = [sensC{2} sensC{3} sensC{4}];
+%     fid = sens([17 44 114],:);  
+%     
+%     % Save sensor positions and fiducials
+%     save(param.sensfile, 'sens');
+%     save(param.fidfile, 'fid');
+% end
+% 
 
 %:  eeghub_fieldtrip_highpassfilter : High pass filtering uses FIR
 
@@ -146,8 +142,8 @@ param.artefact.interp_method = 'nearest';
 %% Run the Pre Processing
 
 % in parallel (one subject per thread)
-param.parallel = true;
-% param.parallel = false;
+% param.parallel = true;
+param.parallel = false;
 
 % if true, will create a folder with a few parameters in the name. We define our own
 param.autonamedatafolder=0;

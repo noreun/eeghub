@@ -29,18 +29,22 @@ function fname_spm = eeghub_spm_prepare(param)
     D = D.units(:,'uV');
     D.save;
 
-    % specify EEG and REF channels
-    % If I don't have the EEGCHANLABELS, take a sequence
+    % specify EEG and REF channels 
+    % If I don't have the EEGCHANLABELS
     if ~isfield(param, 'eegchanlabelsfile')
-        s = load(param.sensfile);
-        neegchan = size(s.sens,1);
-        if D.nchannels > neegchan
-            D = chantype(D,1:neegchan,'EEG');
-            D = chantype(D,neegchan+1:D.nchannels,'Other');
-        else
-            D = chantype(D,1:D.nchannels,'EEG');
+        % And used a plain .mat file
+        if  strcmp (param.locfile, 'mat')
+            % take a sequence
+            s = load(param.sensfile);
+            neegchan = size(s.sens,1);
+            if D.nchannels > neegchan
+                D = chantype(D,1:neegchan,'EEG');
+                D = chantype(D,neegchan+1:D.nchannels,'Other');
+            else
+                D = chantype(D,1:D.nchannels,'EEG');
+            end
+            D.save;
         end
-        D.save;
     else
         e = load(param.eegchanlabelsfile, 'eegchanlabels');
         eegchanlabelsindices = zeros(size(e.eegchanlabels)); %#ok<*USENS> comes from load
@@ -96,22 +100,20 @@ function fname_spm = eeghub_spm_prepare(param)
         D = spm_eeg_montage(S);
     end
 
-    % for EGI 64 channels nets
-    if D.nchannels==65 && strcmp(D.chanlabels{65},'E65')
-        D = chantype(D,65,'EEG');
-    end
     % Add sensor positions and fiducials
-    if isfield(param, 'sensfile') && isfield(param, 'fidfile')
-        S = [];
+    S = [];
+    S.source = param.locfile;
+    if strcmp (param.locfile, 'mat')
         S.sensfile = param.sensfile;
-        S.source = 'mat';
         S.headshapefile = param.fidfile;
-        S.fidlabel = 'nas lpa rpa';
-        S.D = D;
-        S.task = 'loadeegsens';
-        S.save = 1;
-        D = spm_eeg_prep(S);
+        S.fidlabel = param.fidlabel;
+    else
+        S.sensfile = [param.fname_sensfile param.fname_sensfileext];
     end
+    S.D = D;
+    S.task = 'loadeegsens';
+    S.save = 1;
+    D = spm_eeg_prep(S);
     
     %     % Code for verification of sensor positions in 3D
     %     figure
